@@ -18,14 +18,14 @@ namespace linear {
             vector (const vector&); // копирование
             vector (vector&&); // перемещение
             vector (const std::initializer_list<double> &list);
-            vector operator+ ();
-            vector operator- ();
             
             // вспомогательные
             long unsigned int get_width() const;
             double abs() const;
             vector& get_normalize() const;
             vector& to_normalize();
+            vector operator+ ();
+            vector operator- ();
 
             // индексирование
             double& operator[] (long unsigned int index);

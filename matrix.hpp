@@ -45,8 +45,6 @@ namespace linear {
             vector& operator[] (long unsigned int row);
             vector operator[] (long unsigned int row) const;
 
-            // унарные + и -
-
             // присваивание
             matrix& operator= (const matrix&);
             matrix& operator= (matrix&&);
