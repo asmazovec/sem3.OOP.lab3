@@ -38,8 +38,8 @@ namespace linear {
             double min() const;
             matrix get_transpose() const;
             matrix& to_transpose();
-            matrix operator+ ();
-            matrix operator- ();
+            matrix operator+ () const;
+            matrix operator- () const;
 
             // индексирование
             vector& operator[] (long unsigned int row);

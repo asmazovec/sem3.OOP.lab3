@@ -211,12 +211,12 @@ namespace linear {
         return *this;
     }
 
-    matrix matrix::operator+ () {
+    matrix matrix::operator+ () const {
         matrix C (*this);
         return C;
     }
 
-    matrix matrix::operator- () {
+    matrix matrix::operator- () const {
         matrix C (m_width, m_height);
         for (long unsigned int i = 0; i < m_width; i++)
             C.m_data[i] = -m_data[i];
