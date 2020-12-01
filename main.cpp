@@ -94,22 +94,22 @@ int main() {
 
         sep();
         v3 = {5, 5, 0};
-        vector v31 = {0, 1, 1};
+        v5 = {0, 1, 1};
 
         sep();
-        std::cout << vect_mul (v3, v31) << std::endl;
+        std::cout << vect_mul (v3, v5) << std::endl;
 
         sep();
-        std::cout << scal_mul (v3, v31) << std::endl;
+        std::cout << scal_mul (v3, v5) << std::endl;
             
         sep();
-        std::cout << cos (v3, v31) << std::endl;
+        std::cout << cos (v3, v5) << std::endl;
 
         sep();
-        std::cout << sin (v3, v31) << std::endl;
+        std::cout << sin (v3, v5) << std::endl;
 
         sep();
-        std::cout << angle (v3, v31) << std::endl;
+        std::cout << angle (v3, v5) << std::endl;
 
         sep();
     }

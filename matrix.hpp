@@ -48,7 +48,6 @@ namespace linear {
             // присваивание
             matrix& operator= (const matrix&);
             matrix& operator= (matrix&&);
-            matrix& operator= (const std::initializer_list<std::initializer_list<double>> &list);
             matrix& operator= (double);
             matrix& operator+= (const matrix&);
             matrix& operator-= (const matrix&);

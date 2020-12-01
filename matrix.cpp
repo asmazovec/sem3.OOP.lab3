@@ -250,10 +250,9 @@ namespace linear {
     matrix& matrix::operator= (const matrix& refer) {
          
 #ifdef DEBUG
-        std::cerr << GCOL     << "   op = [copy matrix] " 
+        std::cerr << GCOL     << "    op = [copy matrix] " 
                   << std::setw (3)
                   << id       << " <- " 
-                  << std::setw (3)
                   << refer.id << NCOL << std::endl;
 #endif /* DEBUG */
 
@@ -269,10 +268,9 @@ namespace linear {
     matrix& matrix::operator= (matrix&& refer) {
 
 #ifdef DEBUG
-        std::cerr << GCOL     << "   op = [move matrix] " 
+        std::cerr << GCOL     << "    op = [move matrix] " 
                   << std::setw (3)
-                  << id       << " <- " 
-                  << std::setw (3)
+                  << id       << " <- "
                   << refer.id << NCOL << std::endl;
 #endif /* DEBUG */
 
@@ -285,19 +283,6 @@ namespace linear {
         refer.m_width = 0;
         refer.m_height = 0;
         refer.m_data = nullptr;
-        return *this;
-    }
-
-    matrix& matrix::operator= (const std::initializer_list<std::initializer_list<double>> &list) {
-        if (list.size() != m_height)
-            throw std::length_error ("Invalid initializer list ");
-        for (auto &row : list) 
-            if (row.size() != m_height)
-                throw std::length_error ("Invalid initializer list ");
-        long unsigned int count = 0;
-        for (auto &row : list)
-            for (auto &element : row) 
-                m_data[count++] = element;
         return *this;
     }
 

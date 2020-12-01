@@ -175,10 +175,9 @@ namespace linear {
     vector& vector::operator= (const vector& refer) {
 
 #ifdef DEBUG
-        std::cerr << GCOL     << "   op = [copy vector] " 
+        std::cerr << GCOL     << "    op = [copy vector] " 
                   << std::setw (3)
                   << id       << " <- " 
-                  << std::setw (3)
                   << refer.id << NCOL << std::endl;
 #endif /* DEBUG */
 
@@ -193,10 +192,9 @@ namespace linear {
     vector& vector::operator= (vector&& refer) {
 
 #ifdef DEBUG
-        std::cerr << GCOL     << "   op = [move vector] " 
+        std::cerr << GCOL     << "    op = [move vector] " 
                   << std::setw (3)
                   << id       << " <- " 
-                  << std::setw (3)
                   << refer.id << NCOL << std::endl;
 #endif /* DEBUG */
 
