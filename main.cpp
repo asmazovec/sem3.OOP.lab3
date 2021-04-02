@@ -13,8 +13,12 @@ using namespace linear;
 
 int main() {
     try {
+        vector v1 = {1,2,3,4};
+        std::cout << v1 << std::endl;
+        std::cout << -v1 << std::endl;
+        std::cout << v1.to_transpose() << std::endl;
+        std::cout << v1.to_transpose() << std::endl;
         matrix m1 (1, 2.);
-        vector v1 (1, 2.);
 
         matrix m21 = {{1, 2}, {3, 4}};
         matrix m22 = {{5, 6}, {7, 8}};

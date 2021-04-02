@@ -9,23 +9,36 @@
 
 namespace linear {
     class vector: public matrix {
-        private:
-            explicit vector (double*, long unsigned int width);
+        // внешние функции
+        friend vector operator+ (const vector&, const vector&);
+        friend vector operator+ (const vector&, const matrix&);
+        friend vector operator- (const vector&, const matrix&);
+        friend vector operator- (const vector&, const vector&);
+        friend vector operator* (const vector&, double); 
+        friend vector operator* (double, const vector&); 
+        friend vector operator* (const vector&, const matrix&);
+        friend vector vect_mul (const vector&, const vector&); // векторное произведение
+        friend double scal_mul (const vector&, const vector&); // скалярное произведение
+
+        // стейтмент вывода
+        friend std::ostream& operator<< (std::ostream&, const vector&);
 
         public:
             explicit vector (long unsigned int width = 1);
             explicit vector (long unsigned int width, double def);
+            vector (const _row&);
             vector (const vector&); // копирование
             vector (vector&&); // перемещение
             vector (const std::initializer_list<double> &list);
             
             // вспомогательные
-            long unsigned int get_width() const;
             double abs() const;
-            vector& get_normalize() const;
+            vector get_normalize() const;
             vector& to_normalize();
-            vector operator+ ();
-            vector operator- ();
+            vector get_transpose() const;
+            vector& to_transpose();
+            vector& operator+ ();
+            vector& operator- ();
 
             // индексирование
             double& operator[] (long unsigned int index);
@@ -35,7 +48,6 @@ namespace linear {
             vector& operator= (const vector&); // оператор копирования
             vector& operator= (vector&&); // оператор перемещения
             vector& operator= (double);
-
             vector& operator+= (const vector&);
             vector& operator+= (const matrix&);
             vector& operator-= (const vector&);
@@ -43,25 +55,6 @@ namespace linear {
             vector& operator*= (const matrix&);
 
             vector& operator*= (double); // произведение со скаляром
-
-            // внешние функции
-            friend bool is_proport (const vector&, const vector&);
-            friend vector operator+ (const vector&, const vector&);
-            friend vector operator+ (const vector&, const matrix&);
-            friend vector operator- (const vector&, const matrix&);
-            friend vector operator- (const vector&, const vector&);
-            friend vector operator* (const vector&, double); 
-            friend vector operator* (double, const vector&); 
-            friend vector operator* (const vector&, const matrix&);
-            friend vector vect_mul (const vector&, const vector&); // векторное произведение
-            friend double scal_mul (const vector&, const vector&); // скалярное произведение
-
-            // стейтмент вывода
-            friend std::ostream& operator<< (std::ostream&, const vector&);
-
-            //
-            friend vector& matrix::operator[] (long unsigned int row);
-            friend vector matrix::operator[] (long unsigned int row) const;
     };
 
     double cos (const vector&, const vector&);

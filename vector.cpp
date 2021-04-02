@@ -26,7 +26,7 @@
 
 
 namespace linear {
-    vector::vector (long unsigned int width) 
+    vector::vector (unsigned long int width) 
     : matrix (width, 1UL) {
 
 #ifdef DEBUG
@@ -38,7 +38,7 @@ namespace linear {
 
     }
 
-    vector::vector (long unsigned int width, double def)
+    vector::vector (unsigned long int width, double def)
     : matrix (width, 1UL) { 
 
 #ifdef DEBUG
@@ -48,8 +48,22 @@ namespace linear {
                   << NCOL << std::endl;
 #endif /* DEBUG */
 
-        for (long unsigned int i = 0; i < m_width; i++) 
+        for (unsigned long int i = 0; i < m_width; i++) 
             m_data[i] = def;
+    }
+
+    vector::vector (const _row& refer) 
+    : matrix (refer.m_width, 1UL) {
+
+#ifdef DEBUG
+        std::cerr << "\033[1A\033[2K" 
+                  << GCOL << " + " << std::setw (3)
+                  << id   << " vector copy from row " 
+                  << NCOL << std::endl;
+#endif /* DEBUG */
+
+        for (unsigned long int i = 0; i < m_width; i++)
+            m_data[i] = refer.m_data[i];
     }
 
     vector::vector (const vector& refer)
@@ -62,12 +76,12 @@ namespace linear {
                   << refer.id << NCOL << std::endl;
 #endif /* DEBUG */
 
-        for (long unsigned int i = 0; i < m_width; i++)
+        for (unsigned long int i = 0; i < m_width; i++)
             m_data[i] = refer.m_data[i];
     }
 
     vector::vector (vector&& refer)
-    : matrix () {
+    : matrix (refer) {
 
 #ifdef DEBUG
         std::cerr << "\033[1A\033[2K" 
@@ -76,11 +90,6 @@ namespace linear {
                   << refer.id << NCOL << std::endl;
 #endif /* DEBUG */
 
-        m_width = refer.m_width;
-        delete[] m_data;
-        m_data = refer.m_data;
-        refer.m_width = 0;
-        refer.m_data = nullptr;
     }
 
     vector::vector (const std::initializer_list<double> &list)
@@ -98,63 +107,50 @@ namespace linear {
 			m_data[count++] = element;
     }
 
-    vector::vector (double* list, long unsigned int width)
-    : matrix () {
-
-#ifdef DEBUG
-        std::cerr << "\033[1A\033[2K" 
-                  << GCOL << " + " << std::setw (3)
-                  << id   << " vector pointer "
-                  << NCOL << std::endl;
-#endif /* DEBUG */
-        
-        m_width = width;
-        delete[] m_data;
-        m_data = list;
-    }
 
     // вспомогательные
-    long unsigned int vector::get_width() const {
-        return m_width;
-    }
-
     double vector::abs() const {
-        int abs = 0;
-        for (long unsigned int i = 0; i < m_width; i++)
+        double abs = 0;
+        for (unsigned long int i = 0; i < m_width; i++)
             abs += m_data[i] * m_data[i];
         return sqrt(abs);
     }
 
-    vector& vector::get_normalize() const {
-        double len = abs();
-        vector* tmp = new vector (m_width);
-        for (long unsigned int i = 0; i < m_width; i++) 
-            (*tmp)[i] = m_data[i] / len;
-        return *tmp;
+    vector vector::get_transpose() const {
+        return vector (*this).to_transpose();
+    }
+
+    vector& vector::to_transpose() {
+        unsigned long int m_tmp = m_height;
+        m_height = m_width;
+        m_width = m_tmp;
+        return *this;
+    }
+
+    vector vector::get_normalize() const {
+        return vector (*this).to_normalize();
     }
 
     vector& vector::to_normalize() {
         double len = abs();
-        for (long unsigned int i = 0; i < m_width; i++) 
+        for (unsigned long int i = 0; i < m_width; i++) 
             m_data[i] = m_data[i] / len;
         return *this;
     }
 
-    vector vector::operator+ () { 
-        vector C (*this);
-        return C;
+    vector& vector::operator+ () { 
+        matrix::operator+();
+        return *this;
     }
 
-    vector vector::operator- () {
-        vector C (m_width);
-        for (long unsigned int i = 0; i < m_width; i++) 
-            C.m_data[i] = -m_data[i];
-        return C;
+    vector& vector::operator- () {
+        matrix::operator-();
+        return *this;
     }
 
 
     // индексирование
-    double& vector::operator[] (long unsigned int index) {
+    double& vector::operator[] (unsigned long int index) {
         if (index < 0)
             throw std::invalid_argument ("Invalid index ");
         if (index >= m_width) 
@@ -162,7 +158,7 @@ namespace linear {
         return m_data[index];
     }
 
-    double vector::operator[] (long unsigned int index) const {
+    double vector::operator[] (unsigned long int index) const {
         if (index < 0)
             throw std::invalid_argument ("Invalid index ");
         if (index >= m_width) 
@@ -181,143 +177,79 @@ namespace linear {
                   << refer.id << NCOL << std::endl;
 #endif /* DEBUG */
 
-        delete m_data;
-        m_width = refer.m_width;
-        m_data = new double[m_width];
-        for (long unsigned int i = 0; i < m_width; i++) 
-            m_data[i] = refer.m_data[i];
+        matrix::operator=(refer);
         return *this;
     }
 
     vector& vector::operator= (vector&& refer) {
-
-#ifdef DEBUG
-        std::cerr << GCOL     << "    op = [move vector] " 
-                  << std::setw (3)
-                  << id       << " <- " 
-                  << refer.id << NCOL << std::endl;
-#endif /* DEBUG */
-
-        if (&refer == this)
-            return *this;
-        delete m_data;
-        m_width = refer.m_width;
-        m_data = refer.m_data;
-        refer.m_width = 0;
-        refer.m_data = nullptr;
+        matrix::operator=(refer);
         return *this;
     }
 
     vector& vector::operator= (double def) {
-        for (long unsigned int i = 0; i < m_width; i++)
-            m_data[i] = def;
+        matrix::operator=(def);
         return *this;
     }
 
     vector& vector::operator+= (const vector& B) {
-        if (!is_proport (B)) 
-            throw std::length_error ("Vectors are not proportionate ");
-        for (long unsigned int i = 0; i < m_width; i++) 
-            m_data[i] += B.m_data[i];
+        matrix::operator+=(B);
         return *this;
     }
 
     vector& vector::operator+= (const matrix& B) {
-        if (!is_proport (B))
-            throw std::length_error ("Objects are not proportionate ");
-        // приведение к базовому (повышающее приведение)
-        dynamic_cast <matrix&> (*this) += B;
+        matrix::operator+=(B);
         return *this;
     }
 
     vector& vector::operator-= (const vector& B) { 
-        if (!is_proport (B)) 
-            throw std::length_error ("Vectors are not proportionate ");
-        for (long unsigned int i = 0; i < m_width; i++) 
-            m_data[i] -= B.m_data[i];
+        matrix::operator-=(B);
         return *this;
     }
 
     vector& vector::operator-= (const matrix& B) {
-        if (!is_proport (B))
-            throw std::length_error ("Objects are not proportionate ");
-        // приведение к базовому (повышающее приведение)
-        dynamic_cast <matrix&> (*this) -= B;
+        matrix::operator-=(B);
         return *this;
     }
 
     vector& vector::operator*= (const matrix& B) {
-        if (!is_isomeric (B))
-            throw std::length_error ("Objects are not isomeric ");
-        // приведение к базовому (повышающее приведение)
-        dynamic_cast <matrix&> (*this) *= B;
+        matrix::operator*=(B);
         return *this;
     }
 
     vector& vector::operator*= (double B) {
-        for (long unsigned int i = 0; i < m_width; i++) 
-            m_data[i] *= B;
+        matrix::operator*=(B);
         return *this;
     }
 
 
     // внешние функции
-    bool is_proport (const vector& A, const vector& B) {
-        return A.m_width == B.m_width; 
-    }
 
     vector operator+ (const vector& A, const vector& B) {
-        vector C (A);
-        C += B;
-        return C;
+        return vector (A) += B;
     }
   
     vector operator+ (const vector& A, const matrix& B) {
-        vector C (A);
-        C += B;
-        return C;
+        return vector (A) += B;
     }
 
     vector operator- (const vector& A, const vector& B) {
-        vector C (A);
-        C -= B;
-        return C;
+        return vector (A) -= B;
     }
 
     vector operator- (const vector& A, const matrix& B) {
-        vector C (A);
-        C -= B;
-        return C;
+        return vector (A) -= B;
     }
 
     vector operator* (const vector& A, double B) {
-        vector C (A);
-        C *= B;
-        return C;
+        return vector (A) *= B;
     }
 
     vector operator* (double A, const vector& B) {
-        vector C (B);
-        C *= A;
-        return C;
+        return vector (B) *= A ;
     }
 
     vector operator* (const vector& A, const matrix& B) {
-        /*
-        if (!is_isomeric (A, B))
-            throw std::length_error ("Objects are not isomeric ");
-        double* new_data = new double [B.m_width];
-        for (long unsigned int j = 0; j < B.m_width; j++) {
-            new_data[j] = 0.;
-            for (long unsigned int r = 0; r < A.m_width; r++)
-                new_data[j] += A.m_data[r] * B.m_data[r*B.m_width + j];
-        }
-        vector C (new_data, B.m_width);
-        return C;
-        */
-        vector C (A);
-        C *= B;
-        return C;
+        return vector (A) *= B;
     }
 
     /* векторное произведение */
@@ -335,7 +267,7 @@ namespace linear {
         if (A.m_width != B.m_width)
             throw std::invalid_argument ("Invalid vectors ");
         double result = 0.;
-        for (long unsigned int i = 0; i < A.m_width; i++) 
+        for (unsigned long int i = 0; i < A.m_width; i++) 
             result += A.m_data[i] * B.m_data[i];
         return result;
     }
@@ -347,11 +279,11 @@ namespace linear {
         state.copyfmt(std::cout);
         state.setf (std::ios_base::showpoint);
         out << std::setw (0) << "(";
-        for (long unsigned int i = 0; i < V.m_width; i++) {
+        for (unsigned long int i = 0; i < V.m_width*V.m_height; i++) {
             out.copyfmt (state);
             out << V.m_data[i]
                 << std::setw (0)
-                << ((i == V.m_width - 1)?")":", ");
+                << ((i == V.m_width*V.m_height - 1)?")":", ");
         }
         return out;
     }

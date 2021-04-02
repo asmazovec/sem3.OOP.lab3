@@ -7,9 +7,37 @@
 
 
 namespace linear {
+    class matrix;
     class vector;
 
+    class _row {
+        friend matrix;
+        friend vector;
+
+        private:
+            double* m_data;
+            unsigned long int m_width;
+
+        public:
+            _row (double* list, unsigned long int width);
+
+            double& operator[] (long unsigned int index);
+            double operator[] (long unsigned int index) const;
+    };
+
     class matrix { 
+        // внешние функции
+        friend bool is_proport (const matrix&, const matrix&);
+        friend bool is_isomeric (const matrix&, const matrix&);
+        friend matrix operator+ (const matrix&, const matrix&);
+        friend matrix operator- (const matrix&, const matrix&);
+        friend matrix operator* (const matrix&, const matrix&);
+        friend matrix operator* (const matrix&, double);
+        friend matrix operator* (double, const matrix&);
+
+        // стейтмент вывода
+        friend std::ostream& operator<< (std::ostream&, const matrix&);
+
         private:
             static long unsigned int glob_id;
 
@@ -38,12 +66,12 @@ namespace linear {
             double min() const;
             matrix get_transpose() const;
             matrix& to_transpose();
-            matrix operator+ () const;
-            matrix operator- () const;
+            matrix& operator+ ();
+            matrix& operator- ();
 
             // индексирование
-            vector& operator[] (long unsigned int row);
-            vector operator[] (long unsigned int row) const;
+            _row& operator[] (long unsigned int __row);
+            _row operator[] (long unsigned int __row) const;
 
             // присваивание
             matrix& operator= (const matrix&);
@@ -52,20 +80,7 @@ namespace linear {
             matrix& operator+= (const matrix&);
             matrix& operator-= (const matrix&);
             matrix& operator*= (const matrix&);
-
             matrix& operator*= (double);
-
-            // внешние функции
-            friend bool is_proport (const matrix&, const matrix&);
-            friend bool is_isomeric (const matrix&, const matrix&);
-            friend matrix operator+ (const matrix&, const matrix&);
-            friend matrix operator- (const matrix&, const matrix&);
-            friend matrix operator* (const matrix&, const matrix&);
-            friend matrix operator* (const matrix&, double);
-            friend matrix operator* (double, const matrix&);
-
-            // стейтмент вывода
-            friend std::ostream& operator<< (std::ostream&, const matrix&);
     };
 }
 

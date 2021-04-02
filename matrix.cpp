@@ -27,9 +27,33 @@
 
 
 namespace linear {
-    long unsigned int matrix::glob_id = 0;
+    unsigned long int matrix::glob_id = 0;
+    
+    _row::_row (double* list, unsigned long int width)
+    : m_data (list), m_width (width) {
+        if (width < 1)
+            throw std::invalid_argument ("Invalid _row size ");
+    }
 
-    matrix::matrix (long unsigned int size)
+    double& _row::operator[] (long unsigned int index) {
+        if (index < 0)
+            throw std::invalid_argument ("Invalid index ");
+        if (index >= m_width) 
+            throw std::out_of_range ("Index is out of range ");
+        return m_data[index];
+    }
+
+    double _row::operator[] (long unsigned int index) const {
+        if (index < 0)
+            throw std::invalid_argument ("Invalid index ");
+        if (index >= m_width) 
+            throw std::out_of_range ("Index is out of range ");
+        return m_data[index];
+    }
+
+
+    /// Constructor square matrix { size * size }
+    matrix::matrix (unsigned long int size)
     : m_width (size), m_height (size), id (glob_id++) {
 
 #ifdef DEBUG
@@ -43,7 +67,9 @@ namespace linear {
         m_data = new double[size * size];
     }
 
-    matrix::matrix (long unsigned int size, double def)
+
+    /// Constructor square matrix with default { size * size }
+    matrix::matrix (unsigned long int size, double def)
     : m_width (size), m_height (size), id (glob_id++) {
 
 #ifdef DEBUG
@@ -55,11 +81,13 @@ namespace linear {
         if (size < 1)
             throw std::invalid_argument ("Invalid matrix size ");
         m_data = new double[size * size];
-        for (long unsigned int i = 0; i < size * size; i++) 
+        for (unsigned long int i = 0; i < size * size; i++) 
             m_data[i] = def;
     }
 
-    matrix::matrix (long unsigned int width, long unsigned int height)
+
+    /// Constructor matrix { width * height }
+    matrix::matrix (unsigned long int width, unsigned long int height)
     : m_width (width), m_height (height), id (glob_id++) {
 
 #ifdef DEBUG
@@ -75,7 +103,9 @@ namespace linear {
         m_data = new double[width * height];
     }
 
-    matrix::matrix (long unsigned int width, long unsigned int height, double def)
+
+    /// Constructor matrix with default { width * height }
+    matrix::matrix (unsigned long int width, unsigned long int height, double def)
     : m_width (width), m_height (height), id (glob_id++) {
 
 #ifdef DEBUG
@@ -89,10 +119,12 @@ namespace linear {
         if (width < 1)
             throw std::invalid_argument ("Invalid matrix width ");
         m_data = new double[width * height];
-        for (long unsigned int i = 0; i < width * height; i++) 
+        for (unsigned long int i = 0; i < width * height; i++) 
             m_data[i] = def;
     }
 
+
+    /// Copy constructor
     matrix::matrix (const matrix& refer)
     : m_width (refer.m_width), m_height (refer.m_height), id (glob_id++) {
 
@@ -103,24 +135,29 @@ namespace linear {
 #endif /* DEBUG */
 
         m_data = new double[m_width * m_height];
-        for (long unsigned int i = 0; i < m_width * m_height; i++) 
+        for (unsigned long int i = 0; i < m_width * m_height; i++) 
             m_data[i] = refer.m_data[i];
     }
 
+
+    /// Move constructor
     matrix::matrix (matrix&& refer)
     : m_data (refer.m_data), m_width (refer.m_width), m_height (refer.m_height), id (glob_id++) {
 
 #ifdef DEBUG
         std::cerr << GCOL << " + " << std::setw (3)
                   << id   << " matrix move from " << std::setw (3)
-                  << refer.id << NCOL << std::endl;
+                  << refer.id << NCOL << std::endl << std::endl << std::endl;
 #endif /* DEBUG */
 
         refer.m_width = 0;
         refer.m_height = 0;
         refer.m_data = nullptr;
+
     }
 
+
+    /// Initializer list constructor
     matrix::matrix (const std::initializer_list<std::initializer_list<double>> &list)
     : m_width (0), m_height (list.size()), id (glob_id++) {
 
@@ -131,20 +168,22 @@ namespace linear {
 #endif /* DEGUB */
 
         m_width = list.begin()->size();
-        for (auto &row : list)
-            if (row.size() != m_width)
+        for (auto &_row : list)
+            if (_row.size() != m_width)
                 throw std::length_error ("Invalid initialiser list ");
         if (m_width < 1)
             throw std::length_error ("Invalid initialiser list ");
         if (m_height < 1)
             throw std::length_error ("Invalid initialiser list ");
         m_data = new double[m_width * m_height];
-        long unsigned int count = 0;
-        for (auto &row : list)
-           for (auto &element : row) 
+        unsigned long int count = 0;
+        for (auto &_row : list)
+           for (auto &element : _row) 
                m_data[count++] = element;
     }
 
+
+    /// Destructor matrix
     matrix::~matrix() {
 
 #ifdef DEBUG
@@ -158,11 +197,11 @@ namespace linear {
 
 
     // вспомогательные
-    long unsigned int matrix::get_width() const {
+    unsigned long int matrix::get_width() const {
         return m_width;
     }
 
-    long unsigned int matrix::get_height() const {
+    unsigned long int matrix::get_height() const {
         return m_height;
     }
 
@@ -176,7 +215,7 @@ namespace linear {
 
     double matrix::max() const {
         double max = m_data[0];
-        for (long unsigned int i = 1; i < m_height * m_width; i++) 
+        for (unsigned long int i = 1; i < m_height * m_width; i++) 
             if (max < m_data[i])
                 max = m_data[i];
         return max;
@@ -184,63 +223,56 @@ namespace linear {
 
     double matrix::min() const {
         double min = m_data[0];
-        for (long unsigned int i = 1; i < m_height * m_width; i++) 
+        for (unsigned long int i = 1; i < m_height * m_width; i++) 
             if (min > m_data[i])
                 min = m_data[i];
         return min;
     }
 
     matrix matrix::get_transpose() const {
-        matrix C (m_height, m_width);
-        for (long unsigned int i = 0; i < m_height; i++)
-            for (long unsigned int j = 0; j < m_width; j++)
-                C.m_data[j * m_height + i] = m_data[i * m_width + j];
-        return C;
+        return matrix (*this).to_transpose();
     }
 
     matrix& matrix::to_transpose() {
-        double* new_data = new double[m_width * m_height];
-        for (long unsigned int i = 0; i < m_height; i++)
-            for (long unsigned int j = 0; j < m_width; j++) 
-                new_data[j * m_height + i] = m_data[i * m_width + j];
-        delete[] m_data;
-        long unsigned int old_height = m_height;
-        m_height = m_width;
-        m_width = old_height;
-        m_data = new_data;
+        if (m_height == 1UL) {
+            m_height = m_width;
+            m_width = 1UL;
+        } else if (m_width == 1UL) {
+            m_width = m_height;
+            m_height = 1UL;
+        } else {
+            double* new_data = new double[m_width * m_height];
+            for (unsigned long int i = 0; i < m_height; i++)
+                for (unsigned long int j = 0; j < m_width; j++) 
+                    new_data[j * m_height + i] = m_data[i * m_width + j];
+            delete[] m_data;
+            unsigned long int old_height = m_height;
+            m_height = m_width;
+            m_width = old_height;
+            m_data = new_data;
+        }
         return *this;
     }
 
-    matrix matrix::operator+ () const {
-        matrix C (*this);
-        return C;
+    matrix& matrix::operator+ () {
+        return *this;
     }
 
-    matrix matrix::operator- () const {
-        matrix C (m_width, m_height);
-        for (long unsigned int i = 0; i < m_width; i++)
-            C.m_data[i] = -m_data[i];
-        return C;
+    matrix& matrix::operator- () {
+        for (unsigned long int i = 0; i < m_width; i++)
+            m_data[i] = -m_data[i];
+        return *this;
     }
 
 
     // индексирование
-    vector& matrix::operator[] (long unsigned int row) {
-        if (row < 0)
+    _row matrix::operator[] (unsigned long int __row) const {
+        if (__row < 0)
             throw std::invalid_argument ("Invalid index ");
-        if (row >= m_height) 
+        if (__row >= m_height) 
             throw std::out_of_range ("Index is out of range ");
-        vector* line = new vector (&m_data[row * m_width], m_width);
-        return *line;
-    }
-
-    vector matrix::operator[] (long unsigned int row) const {
-        if (row < 0)
-            throw std::invalid_argument ("Invalid index ");
-        if (row >= m_height) 
-            throw std::out_of_range ("Index is out of range ");
-        vector line (m_width);
-        for (long unsigned int i = 0; i < m_width; i++)
+        _row line (m_data, m_width);
+        for (unsigned long int i = 0; i < m_width; i++)
             line.m_data[i] = m_data[i];
         return line;
     }
@@ -256,11 +288,13 @@ namespace linear {
                   << refer.id << NCOL << std::endl;
 #endif /* DEBUG */
 
-        delete[] m_data;
-        m_width = refer.m_width;
-        m_height = refer.m_height;
-        m_data = new double[m_width * m_height];
-        for (long unsigned int i = 0; i < m_width * m_height; i++) 
+        if (m_width * m_height != refer.m_width * refer.m_height) {
+            delete[] m_data;
+            m_width = refer.m_width;
+            m_height = refer.m_height;
+            m_data = new double[m_width * m_height];
+        }
+        for (unsigned long int i = 0; i < m_width * m_height; i++) 
             m_data[i] = refer.m_data[i];
         return *this;
     }
@@ -287,7 +321,7 @@ namespace linear {
     }
 
     matrix& matrix::operator= (double def) {
-        for (long unsigned int i = 0; i < m_width * m_height; i++)
+        for (unsigned long int i = 0; i < m_width * m_height; i++)
             m_data[i] *= def;
         return *this;
     }
@@ -295,7 +329,7 @@ namespace linear {
     matrix& matrix::operator+= (const matrix& B) {
         if (!is_proport (B))
             throw std::length_error ("Matrix's sizes are different ");
-        for (long unsigned int i = 0; i < m_width * m_height; i++)
+        for (unsigned long int i = 0; i < m_width * m_height; i++)
             m_data[i] += B.m_data[i];
         return *this;
     }
@@ -303,7 +337,7 @@ namespace linear {
     matrix& matrix::operator-= (const matrix& B) {
         if (!is_proport (B))
             throw std::length_error ("Matrix's sizes are different ");
-        for (long unsigned int i = 0; i < m_width * m_height; i++)
+        for (unsigned long int i = 0; i < m_width * m_height; i++)
             m_data[i] -= B.m_data[i];
         return *this;
     }
@@ -312,10 +346,10 @@ namespace linear {
         if (!is_isomeric (B))
             throw std::length_error ("Matrixs are not isomeric ");
         double* new_data = new double [m_height * B.m_width];
-        for (long unsigned int i = 0; i < m_height; i++)
-            for (long unsigned int j = 0; j < B.m_width; j++) {
+        for (unsigned long int i = 0; i < m_height; i++)
+            for (unsigned long int j = 0; j < B.m_width; j++) {
                 new_data[i * B.m_width + j] = 0.;
-                for (long unsigned int r = 0; r < m_width; r++) 
+                for (unsigned long int r = 0; r < m_width; r++) 
                    new_data[i * B.m_width + j] += m_data[i * m_width + r] * B.m_data[r * B.m_width + j];
             }
         delete[] m_data;
@@ -325,7 +359,7 @@ namespace linear {
     }
 
     matrix& matrix::operator*= (double B) {
-        for (long unsigned int i = 0; i < m_width * m_height; i++)
+        for (unsigned long int i = 0; i < m_width * m_height; i++)
             m_data[i] *= B;
         return *this;
     }
@@ -341,33 +375,23 @@ namespace linear {
     }
 
     matrix operator+ (const matrix& A, const matrix& B) {
-        matrix C (A);
-        C += B;
-        return C;
+        return matrix (A) += B;
     }
 
     matrix operator- (const matrix& A, const matrix& B) {
-        matrix C (A);
-        C -= B;
-        return C;
+        return matrix (A) -= B;
     }
 
     matrix operator* (const matrix& A, const matrix& B) {
-        matrix C (A);
-        C *= B;
-        return C;
+        return matrix (A) *= B;
     }
 
     matrix operator* (const matrix& A, double B) {
-        matrix C (A);
-        C *= B;
-        return C;
+        return matrix (A) *= B;
     }
 
     matrix operator* (double A, const matrix& B) {
-        matrix C (B);
-        C *= A;
-        return C;
+        return matrix (B) *= A;
     }
 
 
@@ -376,9 +400,9 @@ namespace linear {
         std::ios state (nullptr);
         state.copyfmt(std::cout);
         state.setf (std::ios_base::showpoint);
-        for (long unsigned int i = 0; i < M.m_height; i++) {
+        for (unsigned long int i = 0; i < M.m_height; i++) {
             out << std::setw (0) << ((i == 0)?"{{":" {");
-            for (long unsigned int j = 0; j < M.m_width; j++) {
+            for (unsigned long int j = 0; j < M.m_width; j++) {
                 out.copyfmt (state);
                 out << M.m_data[i * M.m_width + j] 
                     << std::setw (0)
